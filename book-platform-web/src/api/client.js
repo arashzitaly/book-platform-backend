@@ -190,6 +190,13 @@ class ApiClient {
         });
     }
 
+    async rescheduleBooking(id, data) {
+        return this.request(`/bookings/${id}/reschedule`, {
+            method: 'PUT',
+            body: JSON.stringify(data)
+        });
+    }
+
     // Notifications
     async getNotifications(limit = 50) {
         return this.request(`/notifications?limit=${limit}`);

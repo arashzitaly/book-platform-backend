@@ -318,6 +318,49 @@ class BookPlatformApp {
         }
     }
 
+    async cancelBooking(bookingId) {
+        if (!confirm('Are you sure you want to cancel this booking? The customer will be notified.')) {
+            return;
+        }
+        try {
+            await api.updateBookingStatus(bookingId, 4); // Status 4 = Cancelled
+            this.showToast('Booking cancelled. Customer has been notified.', 'success');
+            router.handleRoute();
+        } catch (e) {
+            this.showToast(e.message || 'Failed to cancel booking', 'error');
+        }
+    }
+
+    showRescheduleModal(bookingId, facilityId) {
+        document.getElementById('modal-container').innerHTML = Pages.RescheduleModal(bookingId, facilityId);
+    }
+
+    async handleReschedule(event, bookingId) {
+        event.preventDefault();
+        const form = event.target;
+        const newDate = form.newDate.value;
+        const newStart = form.newStartTime.value;
+        const newEnd = form.newEndTime.value;
+        const message = form.message.value;
+
+        const data = {
+            newStartTime: `${newDate}T${newStart}:00`,
+            newEndTime: `${newDate}T${newEnd}:00`,
+            message: message || undefined
+        };
+
+        try {
+            await api.rescheduleBooking(bookingId, data);
+            this.closeModal();
+            this.showToast('Booking rescheduled! Customer has been notified.', 'success');
+            router.handleRoute();
+        } catch (e) {
+            const errorEl = document.getElementById('reschedule-error');
+            errorEl.textContent = e.message || 'Failed to reschedule';
+            errorEl.classList.remove('hidden');
+        }
+    }
+
     // Toast notifications
     showToast(message, type = 'success') {
         const container = document.getElementById('toast-container');

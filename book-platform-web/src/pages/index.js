@@ -798,6 +798,8 @@ export async function FacilityBookingsPage(params) {
 
 function OwnerBookingCard(booking, showActions = true) {
   const slotTime = new Date(booking.slotStartTime);
+  const isUpcoming = slotTime > new Date();
+  const canManage = isUpcoming && [0, 2].includes(booking.status);
 
   return `
     <div class="card">
@@ -811,6 +813,7 @@ function OwnerBookingCard(booking, showActions = true) {
             </p>
             <p class="text-muted text-sm">Party of ${booking.partySize}</p>
             ${booking.notes ? `<p class="text-muted text-sm mt-2">Note: ${booking.notes}</p>` : ''}
+            ${booking.userEmail ? `<p class="text-muted text-sm">📧 ${booking.userEmail}</p>` : ''}
           </div>
           <div class="text-right">
             <span class="badge ${statusBadge[booking.status]}">${statusLabel[booking.status]}</span>
@@ -820,6 +823,12 @@ function OwnerBookingCard(booking, showActions = true) {
                 <button class="btn btn-ghost btn-sm" onclick="window.app.updateBooking('${booking.id}', 3)">Reject</button>
               </div>
             ` : ''}
+            ${canManage && booking.status === 2 ? `
+              <div class="flex gap-2 mt-4">
+                <button class="btn btn-secondary btn-sm" onclick="window.app.showRescheduleModal('${booking.id}', '${booking.facilityId}')">Reschedule</button>
+                <button class="btn btn-ghost btn-sm" onclick="window.app.cancelBooking('${booking.id}')">Cancel</button>
+              </div>
+            ` : ''}
           </div>
         </div>
       </div>
@@ -827,3 +836,43 @@ function OwnerBookingCard(booking, showActions = true) {
   `;
 }
 
+// Reschedule Modal for owners
+export function RescheduleModal(bookingId, facilityId) {
+  return `
+    <div class="modal-overlay" onclick="window.app.closeModal()">
+      <div class="modal" style="max-width: 450px;" onclick="event.stopPropagation()">
+        <div class="modal-header">
+          <h2 class="modal-title">Reschedule Booking</h2>
+          <p class="text-secondary">Select a new time slot for this reservation</p>
+        </div>
+        <form id="reschedule-form" onsubmit="window.app.handleReschedule(event, '${bookingId}')">
+          <div class="modal-body">
+            <div class="form-group">
+              <label class="form-label">New Date</label>
+              <input type="date" name="newDate" class="form-input" required min="${new Date().toISOString().split('T')[0]}">
+            </div>
+            <div class="grid gap-4" style="grid-template-columns: 1fr 1fr;">
+              <div class="form-group">
+                <label class="form-label">New Start Time</label>
+                <input type="time" name="newStartTime" class="form-input" required value="09:00">
+              </div>
+              <div class="form-group">
+                <label class="form-label">New End Time</label>
+                <input type="time" name="newEndTime" class="form-input" required value="10:00">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Message to customer (optional)</label>
+              <textarea name="message" class="form-input" rows="2" placeholder="Your booking has been rescheduled..."></textarea>
+            </div>
+            <div id="reschedule-error" class="form-error hidden"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-ghost" onclick="window.app.closeModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Reschedule</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+}
