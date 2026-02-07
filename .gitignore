@@ -10,3 +10,21 @@ obj/
 *.vssscc
 # Mac files
 .DS_Store
+
+# Node.js
+node_modules/
+dist/
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+terraform.tfvars
+*.tfvars
+!*.tfvars.example
+
+# Environment files
+.env
+.env.local
+*.local

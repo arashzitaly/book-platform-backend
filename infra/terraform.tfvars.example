@@ -1,0 +1,12 @@
+# Default values for production environment
+# Create a terraform.tfvars file with actual values (NOT committed to git)
+
+aws_region  = "us-east-1"
+environment = "production"
+app_name    = "bookplatform"
+
+# These should be provided via environment or tfvars (secrets)
+# db_password = "your-secure-password"
+# jwt_secret  = "your-jwt-secret-at-least-32-chars"
+# api_image   = "ghcr.io/your-org/book-platform-backend/api:latest"
+# web_image   = "ghcr.io/your-org/book-platform-backend/web:latest"
